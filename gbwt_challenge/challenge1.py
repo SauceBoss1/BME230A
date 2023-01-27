@@ -233,8 +233,8 @@ def constructCommonSuffixMatrix(A, X):
    
    for j in range(1,N+1):
       for i in range(1,M):
-         str_1 = X[A[i,j]][:j][::-1]
-         str_2 = X[A[i-1,j]][:j][::-1]
+         str_1, str_2 = X[A[i,j]][:j][::-1], X[A[i-1,j]][:j][::-1]
+         
          str_len = 0
          assert len(str_1) == len(str_2)
          while str_len < len(str_1) and str_1[str_len] == str_2[str_len]:
