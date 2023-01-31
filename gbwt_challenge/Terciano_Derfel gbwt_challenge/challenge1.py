@@ -61,39 +61,35 @@ def constructReversePrefixSortMatrix(X):
    #Code to write - you're free to define extra functions 
    #(inline or outside of this function) if you like.
 
-   #inspired by prof. Paten
+   #inspired by Alg 1 in Durbin's PBWT paper 
 
    A[0,0] = 0
-   for i in range(1, len(X)):
+   for i in range(1, len(X)): #set col 0 to increasing order
       A[i,0] = A[i-1,0]+1
 
    M = len(X)
    N = len(X[0])
 
-   a_k = [i for i in range(M)]
+   a_k = [i for i in range(M)] #permutation of numbers 0,...,M-1
 
-   for k in range(1, N+1):
+   for k in range(1, N+1): #for each char 'k'
       a=[]
       b=[]
 
-      for i in a_k:
-         if X[i][:k][::-1].startswith('0'):
+      for i in a_k: # for each index i based on the ordering of a_k
+         if X[i][:k][::-1].startswith('0'): # 0s go in list a
             a.append(i)
-         else:
-            b.append(i)
+         else: # 1s go in list b
+            b.append(i) 
       
-      a_k = a+b
+      a_k = a+b #combine the sorted a and b lists
 
-      for i in range(M):
+      for i in range(M): #update each column in row k
          A[i,k] = a_k[i]
 
 
-   #print(A)
    return A 
    
-
-#constructReversePrefixSortMatrix(['110', '000', '001', '010', '100', '001', '100'])
-
 """Problem 2: 
 
 Following on from the previous problem, let Y be the MxN matrix such that for 
@@ -116,12 +112,14 @@ def constructYFromX(X):
    #Code to write - you're free to define extra functions
    #(inline or outside of this function) if you like.
 
-   A = constructReversePrefixSortMatrix(X)
+   A = constructReversePrefixSortMatrix(X) #create Matrix A
+
    M = len(X)
    N = len(X[0])
-   for i in range(0,M):
+
+   for i in range(0,M): #iterate through each column and row
       for j in range(0,N):
-         Y[i,j] = X[A[i,j]][j]
+         Y[i,j] = X[A[i,j]][j] #procedure describe to us in the above description of problem 2
    
 
    return Y
@@ -134,11 +132,22 @@ returning X as a list of strings as defined in problem 1.
 Hint: This is the inverse of X to Y, but the code may look very similar.
 
 Question 3a: In terms of M and N what is the asymptotic cost of your algorithm?
+A: O(MN) This is because the algorithm itself needs to iterate through each index (i) and it needs to
+   iterate through each string char k.
 
 Question 3b: What could you use the transformation of Y for? 
 Hint: consider the BWT.
+A: O(MN) This transformation can be used like a BWT transformation. With this algorithm, we
+   can see similatries as to how we can approach this problem to when we did the bwt notebook.
+   Here, we basically move the 'subtrings' around until we got our original strings just like
+   in the bwt 
 
 Question 3c: Can you come up with a more efficient data structure for storing Y?
+A: Since it was mentioned in Durbins positional BWT algorithm paper, it is best if we use
+   Huffman encoding since Huffman encoding uses primarily 0s and 1s to decide the order
+   of the trees. 
+   With that being said, it seems like the most efficient data structure for storing Y
+   would be using a series heaps and trees.
 """
 def constructXFromY(Y):
    #Creates the MxN matrix
@@ -152,24 +161,31 @@ def constructXFromY(Y):
    M = len(Y)
    N = len(Y[0])
 
-   a_k = [([], i) for i in range(M)]
+   a_k = [([], i) for i in range(M)] # just like in problem 1, a modified
+                                     # permutation of 0,...,M-1
+                                     # but this time each number is associated with
+                                     # a list of 0s and 1s that gets updated as we 
+                                     # go through the algorithm
 
-   for k in range(N):
+                                     # in the end each list should contain the ordered
+                                     # string that is an element of X
+
+   for k in range(N): #go through each row k
       a=[]
       b=[]
-      for i in range(M):
-         a_k[i][0].append(Y[i,k])
+      for i in range(M): #go through each col i
+         a_k[i][0].append(Y[i,k]) #append the char from Y[i,k] from each item in a_k
 
-         if a_k[i][0][-1] == 0:
+         if a_k[i][0][-1] == 0: #like in problem 1, use the pbwt sorting algorithm
             a.append(a_k[i])
          else:
             b.append(a_k[i])
          
-      a_k = a + b
+      a_k = a + b #combine lists like in problem 1
 
    for i in range(N):
       for j in a_k:
-         X[j[1],i] = j[0][i]
+         X[j[1],i] = j[0][i] #update matrix X (update is O(MN))
    
    return list(map(lambda i : "".join(map(str, i)), X)) #Convert back to a list of strings
 
@@ -219,6 +235,7 @@ between X[A[i,j]][:j] and X[A[i-k,j]][:j], for all 0<k<=i is
 min(D[i-k+1,j], D[i-k+2,j], ..., D[i,j]).
 
 Question 4: In terms of M and N what is the asymptotic cost of your algorithm?
+A: O(MN) This is because we need to iterate through both the columns and rows
 """
 #A4: O(MN)
 
@@ -231,14 +248,23 @@ def constructCommonSuffixMatrix(A, X):
    M = len(X)
    N = len(X[0])
    
-   for j in range(1,N+1):
-      for i in range(1,M):
+   #note row 0 and col 0 must be all 0
+
+   for j in range(1,N+1): #each row j
+      for i in range(1,M): #each col i
          str_1, str_2 = X[A[i,j]][:j][::-1], X[A[i-1,j]][:j][::-1]
-         
-         str_len = 0
-         assert len(str_1) == len(str_2)
-         while str_len < len(str_1) and str_1[str_len] == str_2[str_len]:
-            str_len += 1
+
+         # just like descrbed in the problem above, on string
+         # contains: X[A[i,j]][:j], while another contains: X[A[i-1,j]][:j][::-1]
+         # NOTE: these strings are reversed so it is easier to iterate and compare through each
+         #       string from the beginning. Once the strings are not equal, then we can simply break
+         #       this avoids me from calculating the length of the string and iterating backwards
+
+
+         str_len = 0 #intialize count
+         assert len(str_1) == len(str_2) #make sure that both strings are of equal length
+         while str_len < len(str_1) and str_1[str_len] == str_2[str_len]: # keep looping until the index of each string does not match
+            str_len += 1 #idea inspired by grading script
 
          D[i,j] = str_len
 
@@ -257,15 +283,32 @@ the end of the strings.
     
 Question 5a: What is the asymptotic cost of the algorithm in terms of M, N and the
 number of long matches?
-    
+A: Based on Durbin's position BWT, the algorithm is examnined to be of 
+   O(max(NM, number of matches)). This means that the runtime is 
+   proportional to the maximum number of matches for each row and column.
+   However, when return the results of the matches, the runtime of that would
+   be O(NM)
+
 Question 5b: Can you see any major time efficiencies that could be gained by
 refactoring?
+A: In this algorithm, I can see that if we combine the loops that iterate through 
+   list b and c into 2 for loops, then it would make the algorithm run so much farther.
+   In addition, if we used a different approach to where we would only need one matrix
+   instead of dealing with 2 extra for loops, we can then iterate through the entirety
+   of the matrix once.
     
 Question 5c: Can you see any major space efficiencies that could be gained by
 refactoring?
+A: A space efficiency I found would be to find a way to combine matrices A and
+   D together into one single operation. This is because we need to create a 
+   matrix of O(MN) and then create another matrix of O(MN) and this would take up
+   extra space. 
     
 Question 5d: Can you imagine alternative algorithms to compute such matches?,
 if so, what would be the asymptotic cost and space usage?
+A: Based on Durbin's PBWT paper, we can see that in algorithm 4, it has a time complexity of 
+   O(MN) while having a space usage of O(M). Algorithm 4 computes the set maximal matches in
+   string k whereas getLongMatches() gets only the matches based on a specific threshold.
 """
 def getLongMatches(X, minLength):
    assert minLength > 0
