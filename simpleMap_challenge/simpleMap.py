@@ -53,9 +53,34 @@ class MinimizerIndexer(object):
         #
         # then self.minimizerMap = { "AT":(1,6), "AC":(4,) }
         self.minimizerMap = {}
-        
-        # Code to complete to build index - you are free to define additional functions
 
+        # Code to complete to build index - you are free to define additional functions
+        corrected_range = len(self.targetString) - 4
+        repeats = 0
+
+        temp_dict = {}
+        for i in range(0, corrected_range):
+            curr_w = self.targetString[i:i + self.w]
+            k_size = len(curr_w) - self.k
+            k_collection = set()
+
+            for i_k in range(0, k_size + 1):
+                curr_k = curr_w[i_k:i_k + self.k]
+                k_collection.add((curr_k, i + i_k))
+            
+            min_kmer = min(k_collection, key=lambda x:(x[0], x[1]))
+
+            if min_kmer[0] in temp_dict and len(temp_dict[min_kmer[0]]) >= self.t:
+                continue
+
+            if min_kmer[0] not in temp_dict:
+                temp_dict[min_kmer[0]] = set([min_kmer[1]])
+            else:
+                temp_dict[min_kmer[0]].add(min_kmer[1])
+        
+        self.minimizerMap = {k:tuple(v) for k,v in temp_dict.items()}
+        # print(self.targetString, self.minimizerMap)
+        
         # unit-test
 
     def getMatches(self, searchString):
@@ -70,7 +95,10 @@ class MinimizerIndexer(object):
         
         You will need to use the "yield" keyword
         """
-        # Code to complete - you are free to define additional functions 
+        # Code to complete - you are free to define additional functions
+ 
+# t_str = "TACCCCTCAGATGCTTAAGC"
+# new_min = MinimizerIndexer(t_str, 5, 3, 1000)
 
 class SeedCluster:
     """ Represents a set of seeds between two strings.

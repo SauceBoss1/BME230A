@@ -49,10 +49,10 @@ class TestCase(unittest.TestCase):
             # Make random set of seeds
             seedList = []
             seedComponents = {}
-            for x in xrange(xLen):
+            for x in range(xLen):
                 if random.random() > 0.5:
                     ys = []
-                    for y in xrange(yLen):
+                    for y in range(yLen):
                         if random.random() > 0.9:
                             ys.append(y)
                             seedComponents[(x, y)] = [(x, y)]
@@ -64,9 +64,9 @@ class TestCase(unittest.TestCase):
             # Note this algorithm is very expensive scaling roughly with the fourth power 
             # of the length of the input sequences
             seeds = list(seedComponents.keys())
-            for i in xrange(len(seeds)):
+            for i in range(len(seeds)):
                 x1, y1 = seeds[i]
-                for j in xrange(i+1, len(seeds)):
+                for j in range(i+1, len(seeds)):
                     x2, y2 = seeds[j]
                     if abs(x1 - x2) <= l and abs(y1 - y2) <= l:
                         component1 = seedComponents[(x1, y1)]

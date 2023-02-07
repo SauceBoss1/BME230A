@@ -18,27 +18,18 @@ def subCost(ancestorChar, descendantChar, branchLength):
 # positive infinity
 p_inf = float("inf")
 def parsimonyCost(t, alphabet="ACGT", subCostFn=subCost):
-  """ Calculates the cost of substitutions for the given tree t node of a tree, 
-  returns dictionary of alphabet characters to costs"""
-  # Code to write - hint use isinstance function to determine if node is internal or leaf
+    """ Calculates the cost of substitutions for the given tree t node of a tree, 
+    returns dictionary of alphabet characters to costs"""
+    # Code to write - hint use isinstance function to determine if node is internal or leaf
 
-  if isinstance(t.left, N):
-    left = parsimonyCost(t.left, alphabet, subCostFn)
-  else:
-    left = {a:(0 if a == t.left else p_inf) for a in alphabet} 
+    right = parsimonyCost(t.right, alphabet, subCostFn) if isinstance(t.right, N) else {alph:(0 if alph == t.right else p_inf) for alph in alphabet}
+    left = parsimonyCost(t.left, alphabet, subCostFn) if isinstance(t.left, N) else {alph:(0 if alph == t.left else p_inf) for alph in alphabet}
 
-  if isinstance(t.right, N):
-    right = parsimonyCost(t.right, alphabet, subCostFn)
-  else:
-    right = {a:(0 if a == t.right else p_inf) for a in alphabet}
+    cost = {}
+    for a in alphabet:
+        cost[a] = min([x + subCostFn(a, b, t.leftBranchLength) for b, x in left.items()]) + min([x + subCostFn(a, b, t.rightBranchLength) for b, x in right.items()])
 
-  #print(f'left = {left} right = {right}')
-  
-  cost = {}
-  for a in alphabet:
-    cost[a] = min([x + subCostFn(a, b, t.leftBranchLength) for b, x in left.items()]) + min([x + subCostFn(a, b, t.rightBranchLength) for b, x in right.items()])
-  
-  return cost
+    return cost
 
                                         
 print(parsimonyCost(tree)) # Should print {'A': 2, 'C': 4, 'G': 4, 'T': 3}
