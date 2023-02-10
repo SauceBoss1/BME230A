@@ -96,9 +96,14 @@ class MinimizerIndexer(object):
         You will need to use the "yield" keyword
         """
         # Code to complete - you are free to define additional functions
- 
-# t_str = "TACCCCTCAGATGCTTAAGC"
-# new_min = MinimizerIndexer(t_str, 5, 3, 1000)
+        for i in range(0, len(searchString) - self.k + 1):
+            curr_str = searchString[i:i + self.k]
+            if curr_str in self.minimizerMap:
+                yield i, self.minimizerMap[curr_str]
+
+#t_str = "GATTACATTT"
+#new_min = MinimizerIndexer(t_str, 4, 2, 1000)
+#print([x for x in new_min.getMatches("GATTTAC")])
 
 class SeedCluster:
     """ Represents a set of seeds between two strings.

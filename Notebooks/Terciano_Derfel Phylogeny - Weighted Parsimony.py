@@ -22,14 +22,20 @@ def parsimonyCost(t, alphabet="ACGT", subCostFn=subCost):
     returns dictionary of alphabet characters to costs"""
     # Code to write - hint use isinstance function to determine if node is internal or leaf
 
-    right = parsimonyCost(t.right, alphabet, subCostFn) if isinstance(t.right, N) else {alph:(0 if alph == t.right else p_inf) for alph in alphabet}
-    left = parsimonyCost(t.left, alphabet, subCostFn) if isinstance(t.left, N) else {alph:(0 if alph == t.left else p_inf) for alph in alphabet}
+    #inspired by Rob's pseudocode
 
-    cost = {}
-    for a in alphabet:
-        cost[a] = min([x + subCostFn(a, b, t.leftBranchLength) for b, x in left.items()]) + min([x + subCostFn(a, b, t.rightBranchLength) for b, x in right.items()])
+    costs = {}
+    if isinstance(t, str):
+        costs = {alph:0 if alph == t else p_inf for alph in alphabet}
+        return costs
+    else:
+        left = parsimonyCost(t.left, alphabet, subCostFn)
+        right = parsimonyCost(t.right, alphabet, subCostFn)
 
-    return cost
+        for a in alphabet:
+            costs[a] = min([x + subCostFn(a, b, t.leftBranchLength) for b, x in left.items()]) + min([x + subCostFn(a, b, t.rightBranchLength) for b, x in right.items()])
+    return costs
+
 
                                         
 print(parsimonyCost(tree)) # Should print {'A': 2, 'C': 4, 'G': 4, 'T': 3}
