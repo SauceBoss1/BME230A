@@ -101,9 +101,11 @@ class MinimizerIndexer(object):
             if curr_str in self.minimizerMap:
                 yield i, self.minimizerMap[curr_str]
 
-#t_str = "GATTACATTT"
-#new_min = MinimizerIndexer(t_str, 4, 2, 1000)
-#print([x for x in new_min.getMatches("GATTTAC")])
+t_str = "GATTACATTT"
+new_min = MinimizerIndexer(t_str, 4, 2, 1000)
+result = [x for x in new_min.getMatches("GATTTAC")]
+result.sort(key=lambda x:(x[0],x[1]))
+#print(result)
 
 class SeedCluster:
     """ Represents a set of seeds between two strings.
@@ -115,6 +117,7 @@ class SeedCluster:
         seeds = list(seeds)
         seeds.sort()
         self.seeds = seeds
+        #print(f'seeds: {self.seeds}')
         # Gather the minimum and maximum x and y coordinates
         self.minX = seeds[0][0]
         self.maxX = seeds[-1][0]
@@ -151,6 +154,50 @@ class SeedCluster:
         """ 
         
         # Code to complete - you are free to define other functions as you like
+        
+        #After much struggle, Roni inspired me to use BFS
+
+        pairs = []
+        if len(seeds) > 0:
+            for seed in seeds:
+                if len(seed[1]) > 0:
+                    for ys in seed[1]:
+                        pairs.append((seed[0], ys))
+    
+        final_cluster = []
+        result = set()
+
+        def BFS(pair, pairs):
+            queue = [pair]
+            visited = set()
+            visited.add(pair)
+            cluster = set()
+            cluster.add(pair)
+
+            while len(queue) > 0:
+                x1,y1 = queue.pop(0)
+                
+                for x2,y2 in pairs:
+                    if abs(x2-x1) <= l and abs(y2-y1) <=l:
+                        if (x2,y2) not in visited:
+                            queue.append((x2,y2))
+                            visited.add((x2,y2))
+                        cluster.add((x2,y2))
+
+            return cluster
+
+        for pair in pairs:
+            cluster = BFS(pair,pairs)
+            final_cluster.append(cluster)
+        result = set([SeedCluster(seeds) for seeds in final_cluster])
+        
+        return result
+
+#result = [(1, (6,)), (2, ()), (3, (1, 2)), (4, (2,)), (5, ())] # correct = exp: [(1, 6), (3, 1), (3, 2), (4, 2)], testing:(3, 1), result: [(3, 1), (3, 2), (4, 2)] l = 4
+#result = [(0, ()), (1, ()), (2, (2,)), (3, (2,)), (5, ()), (6, (1,))] # correct = exp: [(2, 2)], testing:(2, 2), result: [(2, 2), (3, 2)]
+#result = [(1, (8,)), (2, (2, 4, 5))] # correct = exp: [(2, 4), (2, 5)], testing:(2, 4), result: [(2, 4)] l = 1
+#sc = SeedCluster.clusterSeeds(result, 1) 
+#print(sc.seeds)
 
 class SmithWaterman(object):
     def __init__(self, string1, string2, gapScore=-2, matchScore=3, mismatchScore=-3):

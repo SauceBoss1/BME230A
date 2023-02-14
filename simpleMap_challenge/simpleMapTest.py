@@ -58,7 +58,7 @@ class TestCase(unittest.TestCase):
                             seedComponents[(x, y)] = [(x, y)]
                     seedList.append((x, tuple(ys)))
             
-            #print "l", l, "xLen", xLen, "yLen", yLen, "seedList", seedList
+            #print("l", l, "xLen", xLen, "yLen", yLen, "seedList", seedList)
             
             # Run stupid brute force algorithm to collate seeds
             # Note this algorithm is very expensive scaling roughly with the fourth power 
@@ -76,14 +76,15 @@ class TestCase(unittest.TestCase):
                             component1 += component2
                             for (x3, y3) in component2:
                                 seedComponents[(x3, y3)] = component1
-            
+
             # Generate seed clusters
             seedClusters = sM.SeedCluster.clusterSeeds(seedList, l)
-            
+
             # Check we get what we expect
             for seedCluster in seedClusters:
                 expectedCluster = list(seedComponents[seedCluster.seeds[0]])
                 expectedCluster.sort()
+                #print(f'exp: {expectedCluster}, testing:{seedCluster.seeds[0]}, result: {seedCluster.seeds}, l = {l}')
                 self.assertEquals(expectedCluster, seedCluster.seeds)
       
     def testSmithWaterman(self):
