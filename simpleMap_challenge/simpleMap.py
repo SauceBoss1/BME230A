@@ -164,8 +164,7 @@ class SeedCluster:
                     for ys in seed[1]:
                         pairs.append((seed[0], ys))
     
-        final_cluster = []
-        result = set()
+        final_cluster = set()
 
         def BFS(pair, pairs):
             queue = [pair]
@@ -188,10 +187,9 @@ class SeedCluster:
 
         for pair in pairs:
             cluster = BFS(pair,pairs)
-            final_cluster.append(cluster)
-        result = set([SeedCluster(seeds) for seeds in final_cluster])
+            final_cluster.add(SeedCluster(cluster))
         
-        return result
+        return final_cluster
 
 #result = [(1, (6,)), (2, ()), (3, (1, 2)), (4, (2,)), (5, ())] # correct = exp: [(1, 6), (3, 1), (3, 2), (4, 2)], testing:(3, 1), result: [(3, 1), (3, 2), (4, 2)] l = 4
 #result = [(0, ()), (1, ()), (2, (2,)), (3, (2,)), (5, ()), (6, (1,))] # correct = exp: [(2, 2)], testing:(2, 2), result: [(2, 2), (3, 2)]
