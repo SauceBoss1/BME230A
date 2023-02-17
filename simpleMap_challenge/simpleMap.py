@@ -78,7 +78,7 @@ class MinimizerIndexer(object):
             else:
                 temp_dict[min_kmer[0]].add(min_kmer[1])
         
-        self.minimizerMap = {k:tuple(v) for k,v in temp_dict.items()}
+        self.minimizerMap = temp_dict
         # print(self.targetString, self.minimizerMap)
         
         # unit-test
@@ -173,16 +173,22 @@ class SeedCluster:
             cluster = set()
             cluster.add(pair)
 
+            curr_pairs = set(pairs)
+
             while len(queue) > 0:
                 x1,y1 = queue.pop(0)
                 
-                for x2,y2 in pairs:
-                    if abs(x2-x1) <= l and abs(y2-y1) <=l:
+                found_pairs = set()
+                for x2,y2 in curr_pairs:
+                    if abs(x2-x1) <= l and abs(y2-y1) <=l and (x2,y2) not in cluster:
                         if (x2,y2) not in visited:
                             queue.append((x2,y2))
                             visited.add((x2,y2))
                         cluster.add((x2,y2))
+                        found_pairs.add((x2,y2))
 
+                curr_pairs = curr_pairs.difference(found_pairs)
+                #print(curr_pairs)
             return cluster
 
         for pair in pairs:
@@ -195,7 +201,7 @@ class SeedCluster:
 #result = [(0, ()), (1, ()), (2, (2,)), (3, (2,)), (5, ()), (6, (1,))] # correct = exp: [(2, 2)], testing:(2, 2), result: [(2, 2), (3, 2)]
 #result = [(1, (8,)), (2, (2, 4, 5))] # correct = exp: [(2, 4), (2, 5)], testing:(2, 4), result: [(2, 4)] l = 1
 #sc = SeedCluster.clusterSeeds(result, 1) 
-#print(sc.seeds)
+
 
 class SmithWaterman(object):
     def __init__(self, string1, string2, gapScore=-2, matchScore=3, mismatchScore=-3):
@@ -219,7 +225,7 @@ class SmithWaterman(object):
         self.H = numpy.zeros(shape=[len(string1) + 1, len(string2) + 1], dtype=int)
 
         self.highestScore = (-1 * float("inf"), (0,0)) #highest score and its coords
-        self.scoring = lambda i,j: matchScore if self.string1[i-1] == self.string2[j-1] else mismatchScore
+        self.scoring = lambda i,j: self.matchScore if self.string1[i-1] == self.string2[j-1] else self.mismatchScore
         self.scoreTuple = lambda i,j: (self.H[i-1,j-1] + self.scoring(i,j), \
             self.H[i-1,j] + self.gapScore, \
             self.H[i,j-1] + self.gapScore \
