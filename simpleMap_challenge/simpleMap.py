@@ -55,25 +55,26 @@ class MinimizerIndexer(object):
         self.minimizerMap = {}
 
         # Code to complete to build index - you are free to define additional functions
-        corrected_range = len(self.targetString) - self.w + 1
+        corrected_range = len(self.targetString) - self.w + 1 # adjusts sliding windows size
         repeats = 0
 
         temp_dict = {}
-        for i in range(0, corrected_range):
-            curr_w = self.targetString[i:i + self.w]
-            k_size = len(curr_w) - self.k
+        for i in range(0, corrected_range): # iterate through each window
+            curr_w = self.targetString[i:i + self.w] # current window
+
+            k_size = len(curr_w) - self.k # kmer size with respect to current window
             k_collection = set()
 
-            for i_k in range(0, k_size + 1):
-                curr_k = curr_w[i_k:i_k + self.k]
-                k_collection.add((curr_k, i + i_k))
+            for i_k in range(0, k_size + 1): # find each kmer in windows
+                curr_k = curr_w[i_k:i_k + self.k] # current kmer
+                k_collection.add((curr_k, i + i_k)) # add all kmers to a set
             
-            min_kmer = min(k_collection, key=lambda x:(x[0], x[1]))
+            min_kmer = min(k_collection, key=lambda x:(x[0], x[1])) # lexicographically, find the smallest kmer
 
-            if min_kmer[0] in temp_dict and len(temp_dict[min_kmer[0]]) >= self.t:
+            if min_kmer[0] in temp_dict and len(temp_dict[min_kmer[0]]) >= self.t: # don't update dict if minmer appears more than t times
                 continue
 
-            if min_kmer[0] not in temp_dict:
+            if min_kmer[0] not in temp_dict: # update minimizer map
                 temp_dict[min_kmer[0]] = set([min_kmer[1]])
             else:
                 temp_dict[min_kmer[0]].add(min_kmer[1])
@@ -151,13 +152,21 @@ class SeedCluster:
         (QUESTION 1): The clustering of seeds is very simplistic. Can you suggest alternative strategies by
         which the seeds could be clustered, and what the potential benefits such alternative strategies could
         have? Consider the types of information you could use.  
+
+        A: One approach to cluster seeds is with the use of the K-means clustering algorithm. Typically, the advantages of k-means clustering
+           is that it is relatively easy to implment, can scale to large data sets, and generalizes clusters of different attributes such as shape.
+           Other clustering strategies use machine learning however, they are in some form just a variation of k-means clustering. With that being said,
+           most machine learning approaches have the same benefits as k-means clustering.
         """ 
         
         # Code to complete - you are free to define other functions as you like
         
         #After much struggle, Roni inspired me to use BFS
 
-        pairs = []
+        pairs = [] # pairs are in the tuple of (x,y)
+
+        # the 2 for loops below just deconstruct the input
+        # into something that makes it easier for BFS to deconstruct
         if len(seeds) > 0:
             for seed in seeds:
                 if len(seed[1]) > 0:
@@ -167,32 +176,45 @@ class SeedCluster:
         final_cluster = set()
 
         visited = set()
+
         def BFS(pair, pairs, visited):
-            queue = [pair]
-            visited.add(pair)
-            cluster = set()
+            '''
+            BFS(pair, pairs, visited)
+
+            Starting for pair, iterate throught its neighbor pairs
+            and append any valid pairs into visited.
+
+            Vistied helps us limit iteratin throughout the enitre pair set.
+
+            A valid pair is a pair that is close which follows the following equation:
+                | x_2 - x_1 | and | y_2 - y_1 |
+            '''
+
+            queue = [pair] # initialize BFS queue with input pair
+            visited.add(pair) # current inputted pair must be in visited already
+            cluster = set() # keeps track of any clusters found
             cluster.add(pair)
 
-            curr_pairs = set(pairs)
+            curr_pairs = set(pairs) #current pair neighbors
 
             while len(queue) > 0:
                 x1,y1 = queue.pop(0)
                 
                 found_pairs = set()
-                for x2,y2 in curr_pairs:
+                for x2,y2 in curr_pairs: #iterate through remaining pairs
                     if (x2,y2) not in cluster and (x2,y2) != (x1,y1) and (x2,y2) not in visited and abs(x2-x1) <= l and abs(y2-y1) <=l:
                         queue.append((x2,y2))
                         visited.add((x2,y2))
                         cluster.add((x2,y2))
                         found_pairs.add((x2,y2))
 
-                curr_pairs = curr_pairs.difference(found_pairs)
+                curr_pairs = curr_pairs.difference(found_pairs) # get rid of any redundant neighbors
             return cluster
 
         for pair in pairs:
-            if pair not in visited:
+            if pair not in visited: # skip pairs that already have been visited
                 cluster = BFS(pair,pairs, visited=visited)
-                final_cluster.add(SeedCluster(cluster))
+                final_cluster.add(SeedCluster(cluster)) #updated final cluster list
         
         return final_cluster
 
@@ -212,6 +234,11 @@ class SmithWaterman(object):
         (QUESTION 2): The Smith-Waterman algorithm finds the globally optimal local alignment between to 
         strings, but requires O(|string1| * |string2|) time. Suggest alternative strategies you could implement
         to accelerate the finding of reasonable local alignments. What drawbacks might such alternatives have?
+
+        A: An alternative strategy that we can use in order to accelerate the finding of local alignments is to
+           use the FOGSAA or Fast Optimal Global Sequence Alignment Algorithm. Based on the paper discussing the FOGSAA
+           algorithm, a drawback of the algorithm is that it can sometimes be slower depending on the input string however,
+           it is most of the time faster and it outputs the highest quality of string alignments.
         """
         # Code to complete to compute the edit matrix
 
@@ -224,16 +251,22 @@ class SmithWaterman(object):
         self.H = numpy.zeros(shape=[len(string1) + 1, len(string2) + 1], dtype=int)
 
         self.highestScore = (-1 * float("inf"), (0,0)) #highest score and its coords
-        self.scoring = lambda i,j: self.matchScore if self.string1[i-1] == self.string2[j-1] else self.mismatchScore
+
+        self.scoring = lambda i,j: self.matchScore if self.string1[i-1] == self.string2[j-1] else self.mismatchScore # determines whether or not
+                                                                                                                     # 2 chars are a match or 
+                                                                                                                     # a mismatch
+
+        # the below lambda function determines the score of the diagonal, horizontal, and the vertical neighbor of i,j
         self.scoreTuple = lambda i,j: (self.H[i-1,j-1] + self.scoring(i,j), \
             self.H[i-1,j] + self.gapScore, \
             self.H[i,j-1] + self.gapScore \
-            )
+            ) # 0: diag, 1: vertical, 2: horizontal
         
         for i in range(1, len(self.H) ):
             for j in range(1, len(self.H[0])):
-                self.H[i,j] = max(self.scoreTuple(i,j))
-                if self.H[i,j] > self.highestScore[0]:
+                self.H[i,j] = max(self.scoreTuple(i,j)) # update i,j in self.H
+
+                if self.H[i,j] > self.highestScore[0]: # keep track of highest score found
                     self.highestScore = (self.H[i,j], (i,j))
         #print(self.H, self.highestScore)
 
@@ -257,30 +290,33 @@ class SmithWaterman(object):
         # Code to complete - generated by traceback through matrix to generate aligned pairs
 
         #inspired by NB 4
-        score = self.highestScore
+        score = self.highestScore # retrieve highest score
         alignment = []
         
-        i, j = score[1][0], score[1][1]
+        i, j = score[1][0], score[1][1] # starting coordinates
 
+        # the lambda function below determines the traceback score
         tracebackScore = lambda i,j: ( self.H[i-1, j-1] + self.scoring(i, j), \
             self.H[i-1, j] + self.gapScore, \
             self.H[i, j-1] + self.gapScore
         ) # 0: match/mismatch, 1: vertical, 2: horizontal
 
+        # compared to the nw algorithm, the sw algorithm ends its 
+        # traceback when H[i,j] is found to be 0
         while self.H[i,j] != 0:
             curr_score = tracebackScore(i,j)
-            probable_predecessor = max(curr_score)
+            probable_predecessor = max(curr_score) # the predecessor is the max score of i,j's neighbors
 
-            if probable_predecessor == curr_score[0]:
+            if probable_predecessor == curr_score[0]: # if it's found that the predecessor is a match, then append i,j and move back diagonally
                 i -= 1
                 j -= 1
                 alignment.append((i,j))
-            elif probable_predecessor == curr_score[1]:
+            elif probable_predecessor == curr_score[1]: # move vertically backwards
                 i -= 1
-            elif probable_predecessor == curr_score[2]:
+            elif probable_predecessor == curr_score[2]: # move horizontally backwards
                 j -= 1
         
-        alignment.reverse()
+        alignment.reverse() # make sure to reverse alignments because we started from traceback point
         return alignment
 
 
@@ -288,7 +324,7 @@ class SmithWaterman(object):
         """ Returns the maximum alignment score
         """
         # Code to complete
-        return self.highestScore[0]
+        return self.highestScore[0] # returns highest score found
     
 # str1 = 'GATTACA'
 # str2 = 'CTACC'
@@ -304,6 +340,10 @@ def simpleMap(targetString, minimizerIndex, queryString, config):
     
     (QUESTION 3): The code below is functional, but very slow. Suggest ways you could potentially accelerate it, 
     and note any drawbacks this might have.
+
+    A: Personally, I can't think of anyway on how to make the current code functions. However, I do know that
+       since simpleMap() uses the minimizerIndex, SeedCluster, and the SW algorithm, the only way to make this 
+       function faster is to make the implementations of the above classes faster.
     """
     bestAlignment = [None]
     
