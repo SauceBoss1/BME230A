@@ -101,10 +101,10 @@ class MinimizerIndexer(object):
             if curr_str in self.minimizerMap:
                 yield i, self.minimizerMap[curr_str]
 
-t_str = "GATTACATTT"
-new_min = MinimizerIndexer(t_str, 4, 2, 1000)
-result = [x for x in new_min.getMatches("GATTTAC")]
-result.sort(key=lambda x:(x[0],x[1]))
+# t_str = "GATTACATTT"
+# new_min = MinimizerIndexer(t_str, 4, 2, 1000)
+# result = [x for x in new_min.getMatches("GATTTAC")]
+# result.sort(key=lambda x:(x[0],x[1]))
 #print(result)
 
 class SeedCluster:
@@ -166,9 +166,9 @@ class SeedCluster:
     
         final_cluster = set()
 
-        def BFS(pair, pairs):
+        visited = set()
+        def BFS(pair, pairs, visited):
             queue = [pair]
-            visited = set()
             visited.add(pair)
             cluster = set()
             cluster.add(pair)
@@ -180,20 +180,19 @@ class SeedCluster:
                 
                 found_pairs = set()
                 for x2,y2 in curr_pairs:
-                    if abs(x2-x1) <= l and abs(y2-y1) <=l and (x2,y2) not in cluster:
-                        if (x2,y2) not in visited:
-                            queue.append((x2,y2))
-                            visited.add((x2,y2))
+                    if (x2,y2) not in cluster and (x2,y2) != (x1,y1) and (x2,y2) not in visited and abs(x2-x1) <= l and abs(y2-y1) <=l:
+                        queue.append((x2,y2))
+                        visited.add((x2,y2))
                         cluster.add((x2,y2))
                         found_pairs.add((x2,y2))
 
                 curr_pairs = curr_pairs.difference(found_pairs)
-                #print(curr_pairs)
             return cluster
 
         for pair in pairs:
-            cluster = BFS(pair,pairs)
-            final_cluster.add(SeedCluster(cluster))
+            if pair not in visited:
+                cluster = BFS(pair,pairs, visited=visited)
+                final_cluster.add(SeedCluster(cluster))
         
         return final_cluster
 
