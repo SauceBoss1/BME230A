@@ -342,7 +342,9 @@ def simpleMap(targetString, minimizerIndex, queryString, config):
 
     A: Personally, I can't think of anyway on how to make the current code functions. However, I do know that
        since simpleMap() uses the minimizerIndex, SeedCluster, and the SW algorithm, the only way to make this 
-       function faster is to make the implementations of the above classes faster.
+       function faster is to make the implementations of the above classes faster. Furthermore, if you want to 
+       keep the current implementation, you can probably use Cython (C but in python) in order to make your
+       code run faster or even better, just write this entire program in C/C++ instead.
     """
     bestAlignment = [None]
     
