@@ -189,7 +189,6 @@ class SeedCluster:
             A valid pair is a pair that is close which follows the following equation:
                 | x_2 - x_1 | and | y_2 - y_1 |
             '''
-
             queue = [pair] # initialize BFS queue with input pair
             visited.add(pair) # current inputted pair must be in visited already
             cluster = set() # keeps track of any clusters found
@@ -215,7 +214,7 @@ class SeedCluster:
             if pair not in visited: # skip pairs that already have been visited
                 cluster = BFS(pair,pairs, visited=visited)
                 final_cluster.add(SeedCluster(cluster)) #updated final cluster list
-        
+    
         return final_cluster
 
 #result = [(1, (6,)), (2, ()), (3, (1, 2)), (4, (2,)), (5, ())] # correct = exp: [(1, 6), (3, 1), (3, 2), (4, 2)], testing:(3, 1), result: [(3, 1), (3, 2), (4, 2)] l = 4
