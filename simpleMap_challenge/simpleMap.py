@@ -258,7 +258,7 @@ class SmithWaterman(object):
         # the below lambda function determines the score of the diagonal, horizontal, and the vertical neighbor of i,j
         self.scoreTuple = lambda i,j: (self.H[i-1,j-1] + self.scoring(i,j), \
             self.H[i-1,j] + self.gapScore, \
-            self.H[i,j-1] + self.gapScore \
+            self.H[i,j-1] + self.gapScore, 0 \
             ) # 0: diag, 1: vertical, 2: horizontal
         
         for i in range(1, len(self.H) ):
@@ -297,7 +297,7 @@ class SmithWaterman(object):
         # the lambda function below determines the traceback score
         tracebackScore = lambda i,j: ( self.H[i-1, j-1] + self.scoring(i, j), \
             self.H[i-1, j] + self.gapScore, \
-            self.H[i, j-1] + self.gapScore
+            self.H[i, j-1] + self.gapScore, 0
         ) # 0: match/mismatch, 1: vertical, 2: horizontal
 
         # compared to the nw algorithm, the sw algorithm ends its 
