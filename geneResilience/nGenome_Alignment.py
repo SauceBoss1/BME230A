@@ -9,14 +9,16 @@ outputs a fasta file called "alignment_output.txt"
 
 """
 from needleman import NeedlemanWunsch
-from Bio import SeqIO
+
 class alignTest:
     def __init__(self, sList, IDs, pipeLine = True):
-        self.pipLine = pipeLine
+        self.withMain = []
+        self.pipeLine = pipeLine
         self.sList, self.IDs = sList, IDs
         self.setScoreMeans = []
         self.loopMains()
         self.selectBestSet()
+        
         
         
     def compareSet(self, mainSeqIndex, needsReturn):
@@ -24,29 +26,30 @@ class alignTest:
         initMain = thisSet[mainSeqIndex]
         initLast = thisSet[mainSeqIndex]
         done=False
-        loopCount = 0
+        loopCount = 1
         while not done:
             setIDs = self.IDs.copy()
             setScores = []
-            
+            print('loop in set: ',loopCount)
             for i in range(len(self.sList)):
                 if i == 0:
                     initMain = initLast
                     aligned = [initMain]
                 if i != mainSeqIndex:
                     thisNM = NeedlemanWunsch(initLast,thisSet[i])
-                    revNM = NeedlemanWunsch(initLast,self.revComp(thisSet[i]))
+                    print('NM(1-'+(str(len(self.IDs)-1))+'): ',i+1)
+                    #revNM = NeedlemanWunsch(initLast,self.revComp(thisSet[i]))
                     
-                    if revNM.score > thisNM.score:
-                        thisNM = revNM
-                        setIDs[i]+='-rev'
+                    #if revNM.score > thisNM.score:
+                    #    thisNM = revNM
+                    #    setIDs[i]+='-rev'
                     
                     setScores.append(thisNM.score)
                     initLast = thisNM.show_stringA()
-                    print(initLast, self.IDs[mainSeqIndex])
+                    #print(initLast, self.IDs[mainSeqIndex])
                     adjString2 = thisNM.show_stringB()
                     aligned.append(adjString2)
-                    print(adjString2, self.IDs[i])
+                    #print(adjString2, self.IDs[i])
                     #print('\n')    
                     
                         
@@ -55,17 +58,20 @@ class alignTest:
             #print('\n\n')
             loopCount+=1
         #print('loopCount: '+str(loopCount))
+        self.withMain.append(aligned)
         self.setScoreMeans.append(float(sum(setScores))/float(len(setScores)))
         if needsReturn:
             return aligned, setIDs
         
     def loopMains(self):
         for i in range(len(self.sList)):
+            print('main index set(1-'+str(len(self.sList))+'): ',i+1)
             self.compareSet(i, False)
             
     def selectBestSet(self):
         bestScore = 0
         bestIndex = -1
+        
         for i in range(len(self.setScoreMeans)):
             score = self.setScoreMeans[i]
             if score > bestScore:
@@ -75,13 +81,15 @@ class alignTest:
         print('Main = '+self.IDs[bestIndex], bestScore)
         
     def returnAlignments(self):
-        alignments, IDs = self.compareSet(self.bestIndex, True)
-        if not self.pipLine:
+        #alignments, IDs = self.compareSet(self.bestIndex, True)
+        alignments = self.withMain[self.bestIndex]
+        if not self.pipeLine:
             with open('alignment_output.txt', 'w') as f:
                 for i in range(len(self.IDs)):
-                    print(alignments[i],IDs[i])
-                    f.write('>'+IDs[i]+'\n')
+                    print(alignments[i],self.IDs[i])
+                    f.write('>'+self.IDs[i]+'\n')
                     f.write(alignments[i]+'\n\n')
+            f.close()
         else:
             return alignments
                 
@@ -100,34 +108,45 @@ class alignTest:
                 newString+='C'
             if base == 'T':
                 newString+='A'
+            else:
+                newString+=base
         return newString
+
+def cut(listK):
+    newList = []
+    for sub in listK:
+        newList.append(sub[0:1000])
+    return newList
         
 def main(inFile):
     idList = []
     stringList = []
     lineCount = 0
-    #inFile = open(inFile, 'r')
+    inFile = open(inFile, 'r')
     
-    # for line in inFile:
-    #     line.strip()
-    #     if line[0] == '>':
-    #         end = line.index('\n')
-    #         idList.append(line[1:end])
-    #         lineCount+=1
-    #     elif lineCount == 1:
-    #         stringList.append(line.strip())
-    #         lineCount = 0
-    # inFile.close()
-
-    records = list(SeqIO.parse(inFile, 'fasta'))
-    stringList = [r.seq for r in records]
-    idList = [r.id for r in records]
+    for line in inFile:
+        line.strip()
+        
+        if line[0] == '>':
+            seq =''
+            end = line.index('\n')
+            idList.append(line[1:end])
+            lineCount+=1
+            seq = ''
+        elif line[0] != '\n':
+            seq+=line.strip()
+        else:
+            stringList.append(seq)
+            
+    inFile.close()
+    stringList = cut(stringList)
     
-    alignOb = alignTest(stringList, idList, pipeLine=False)
+    #print(stringList)
+    alignOb = alignTest(stringList, idList, False)
     alignOb.returnAlignments()
     
 
-if __name__ == '__main__':
-  inFile = 'final/A23EEV21.results.fa'
-  main(inFile)
+
+inFile = 'A23EEV21.results.fa'
+main(inFile)
     
