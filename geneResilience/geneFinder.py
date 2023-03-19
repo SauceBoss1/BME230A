@@ -61,7 +61,7 @@ class Orfs:
       - Returns a list of ORF objects
     '''
     orfs = [] # orfs will contain an object of ORFs which contain index, length and sequence
-    dnaseq = dnaseq.replace('_', '')
+    #dnaseq = dnaseq.replace('_', '')
     start_codons = 'A.?TG|A.?_TG|GTG|TTG|ATG' #regex expression that takes into account some mut. starts
     #start_codons = 'ATG' #regex expression that takes into account some mut. starts
     stop_codons = 'TAA|TAG|TGA' #regex expression that takes into account stop codons (non mutated)
@@ -81,36 +81,6 @@ class Orfs:
               orfs.append(Orfs((starts[0]+frame, stop_pos), curr_start_frame[:stops.end()], (stop_pos - starts[0]+frame)))
             break
 
-    # start_pos = [(m.start(), m.end()) for m in re.finditer(start_codons, dnaseq)] # find the indices of ALL start codons
-    # stop_pos = [(m.start(), m.end()) for m in re.finditer(stop_codons, dnaseq)] # find the indices of ALL stop codons
-    # #print(sorted(stop_pos, key=lambda x:x[0], reverse=True))
-    # last_saved_stop = 0
-    # last_saved_start = 0
-
-    # # lists must be reversed in order to pair mutated start codons
-    # for stops in sorted(stop_pos, key=lambda x:x[0], reverse=True):
-    #   stop_end_i = stops[1]
-    #   stop_i = stops[0]
-
-    #   for starts in sorted(start_pos, key=lambda x:x[0], reverse=True):
-    #     start_i = starts[0]
-    #     start_end_i = starts[1]
-
-    #     curr_len = stop_end_i - start_i # determine length of potential ORF
-    #     if stop_i > start_i and stop_i > start_end_i: # check conditions of found oRFs
-          
-    #       if curr_len > minLength: #check for length status
-    #         orfs.insert(0, Orfs((start_i, stop_end_i), dnaseq[start_i:stop_end_i], curr_len))
-    #         last_saved_start = starts
-    #         break
-    #       else:
-    #         last_saved_start = starts
-    #         break
-
-    #   try: # remove a start codon from the start codon position list
-    #     start_pos.remove(last_saved_start)
-    #   except:
-    #     pass
     return orfs
 
 class AlignAllOrfs:

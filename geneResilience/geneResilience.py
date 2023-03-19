@@ -71,7 +71,7 @@ def main(inOpts = None):
         # for record in align:
         #   print(record.seq, file=out)
 
-
+    
 
     # alignSeqs = nga.alignTest(sequences, headers, pipeLine=False)
     # alignSeqs.returnAlignments()
