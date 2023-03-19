@@ -19,6 +19,7 @@ class commandLine:
     self.parser.add_argument('-p', '--plot', action='store_true', help='plot or just align')
     self.parser.add_argument('-a', '--align', action='store_true', help='enables seq alignment')
     self.parser.add_argument('-s', '--stringLim', action='store', type=int, default=500, help='output string limit')
+    self.parser.add_argument('-ul', '--ultraAlign', action='store_false', help='disables ultralAlign')
 
     self.parser.add_argument('-v','--version', action='version', version='%(prog)s 0.4')
 
@@ -71,13 +72,13 @@ def main(inOpts = None):
         # for record in align:
         #   print(record.seq, file=out)
 
-    
+
 
     # alignSeqs = nga.alignTest(sequences, headers, pipeLine=False)
     # alignSeqs.returnAlignments()
 
     findorf = gf.AlignAllOrfs(combineList, minLength=cL.args.minlen)
-    x = findorf.printAlignedOrfs(outFile=out, ultraAlign=True, strLim=cL.args.stringLim)
+    x = findorf.printAlignedOrfs(outFile=out, ultraAlign=cL.args.ultraAlign, strLim=cL.args.stringLim)
 
     #print(findorf.getOrfs, file=sys.stderr)
 

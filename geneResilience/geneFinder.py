@@ -113,7 +113,7 @@ class AlignAllOrfs:
     '''Return unaligned orfs'''
     return self.foundOrfs
 
-  def printAlignedOrfs(self, printStrings = True, outFile = sys.stdout, spacer = '-', ultraAlign = False, strLim = 500):
+  def printAlignedOrfs(self, printStrings = True, outFile = sys.stdout, spacer = '-', ultraAlign = True, strLim = 500):
     '''
     Prints all aligned orfs
 
